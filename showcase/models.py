@@ -14,7 +14,6 @@ class ProductsForMainPage:
         ct_models = ContentType.objects.filter(model__in=args)
         for ct in ct_models:
             model_products = ct.model_class()._base_manager.all()
-            # model_products = ct.model_class().objects.all()
             products.extend(model_products)
         return products
 
@@ -26,9 +25,9 @@ class Category(models.Model):
     def __str__(self):
         return self.category_name
 
-    def save(self):
+    def save(self,*args,**kwargs):
         self.slug = slugify(self)
-        super(Category, self).save()
+        super(Category, self).save(*args,**kwargs)
 
     class Meta:
         verbose_name = 'Категория'
