@@ -1,1 +1,1 @@
-Trainig with django content types and creating eshop
+Training with django content types and creating eshop
