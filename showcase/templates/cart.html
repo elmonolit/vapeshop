@@ -1,10 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}
+    Корзина
+{% endblock %}
+
+{% block content %}
+    {% for pr in cart.products.all %}
+        <a href="{{ pr.content_object.get_absolute_url }}">{{ pr.content_object }}</a><br>
+        <img src="{{ pr.content_object.image.url }}" height="100"><br>
+        Количество:{{ pr.qty }} Цена:{{ pr.final_price }}<br>
+        <a href="{% url 'delete_from_cart' ct_model=pr.content_object.get_model_name product_slug=pr.content_object.slug %}">Удалить из корзины</a>
+    <hr>
+    {% endfor %}
+
+{% endblock %}

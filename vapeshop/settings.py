@@ -1,4 +1,3 @@
-
 from pathlib import Path
 import os
 
@@ -10,7 +9,6 @@ SECRET_KEY = '8hu65(&hg+3*+0d_!f+ggq4ok_w*d@w=4^)*^-_5haxb2dfm)o'
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -55,16 +53,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'vapeshop.wsgi.application'
 
-
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -81,7 +75,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -92,9 +85,8 @@ USE_L10N = True
 
 USE_TZ = True
 
-
-STATIC_URL = '/static/'
+STATIC_URL = '/static_dev/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static_dev')]
-STATIC_ROOT = os.path.join(BASE_DIR ,'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR ,'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
