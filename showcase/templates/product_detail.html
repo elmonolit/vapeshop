@@ -5,9 +5,10 @@
 {% endblock %}
 
 {% block content %}
-        {{ product.title }}<br>
+    <div class="container">
+        <h1>{{ product.title }}</h1><br>
     <img src="{{ product.image.url }}" height="300"><br>
-    Цена: {{ product.price }} руб.<br>
+    Цена: <b>{{ product.price }}</b> руб.<br>
     {{ product.description }}<br>
     {% if product.power %}
     Мощность:{{ product.power }} ватт<br>
@@ -18,10 +19,8 @@
     {% if product.accum_type %}
         Тип аккумулятора: {{ product.accum_type }}<br>
     {% endif %}
-
-{#    ct_model#}
-
-    <a href="{% url 'add_to_cart' ct_model=ct_model product_slug=product.slug  %}">Добавить в корзину</a>
+    </div>
 
 {{ product|product_spec }}
+    <a href="{% url 'add_to_cart' ct_model=ct_model product_slug=product.slug  %}" class="btn btn-primary">Добавить в корзину</a>
 {% endblock %}

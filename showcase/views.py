@@ -1,16 +1,18 @@
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
-from django.views.generic import ListView, View, DetailView
-from .mixins import *
+from django.views.generic import ListView, View, DetailView, CreateView
+from django.contrib import messages
 
+from .mixins import *
 from .models import *
+from .forms import *
 
 
 class BaseView(CartMixin, View):
     def get(self, request):
         products = ProductsForMainPage().get_products('mechmod', 'mod')
         context = {
-            'products': products
+            'products': products,
         }
         return render(request, 'base.html', context)
 
@@ -44,11 +46,7 @@ class CartView(CartMixin, View):
 
 class AddToCart(CartMixin, View):
     def get(self, request, *args, **kwargs):
-        cont_type = ContentType.objects.get(model=kwargs.get('ct_model'))
-        obj_id = cont_type.model_class().objects.get(slug=kwargs.get('product_slug')).id
-        cart_product, created = CartProduct.objects.get_or_create(
-            cart=self.cart, user=self.cart.owner, content_type=cont_type, object_id=obj_id
-        )
+        cont_type, obj_id, cart_product, created = self.content_type_get_or_create(kwargs)
         if created:
             self.cart.products.add(cart_product)
         else:
@@ -56,20 +54,53 @@ class AddToCart(CartMixin, View):
             yet_created.qty += 1
             yet_created.save()
         self.cart.save()
-        # print(a)
         return HttpResponseRedirect('/cart/')
 
 
 class DeleteFromCart(CartMixin, View):
     def get(self, request, *args, **kwargs):
-        ct_model = kwargs.get('ct_model')
-        product_slug = kwargs.get('product_slug')
-        cont_type = ContentType.objects.get(model=ct_model)
-        prod = cont_type.model_class().objects.get(slug=product_slug)
-        cart_product = CartProduct.objects.get(
-            cart=self.cart,user=self.cart.owner,content_type=cont_type,object_id=prod.id
-        )
+        cart_product = self.content_type_get_or_create(kwargs)[2]
         self.cart.products.remove(cart_product)
         cart_product.delete()
         self.cart.save()
+        messages.add_message(request, messages.WARNING, 'Товар удален из корзины')
         return HttpResponseRedirect('/cart/')
+
+
+class ChangeQTY(CartMixin, View):
+    def post(self, request, *args, **kwargs):
+        cart_product = self.content_type_get_or_create(kwargs)[2]
+        cart_product.qty = int(request.POST.get('qty'))
+        cart_product.save()
+        messages.add_message(request, messages.SUCCESS, 'Вы успешно изменили количество товара')
+        return HttpResponseRedirect('/cart/')
+
+
+class OrderView(CartMixin, View):
+
+    def get(self, request, *args, **kwargs):
+        form = OrderForm()
+        return render(request, 'order.html', {'form': form})
+
+    def post(self, request, *args, **kwargs):
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            form.instance.cart = self.cart
+            form.save()
+            messages.add_message(request, messages.SUCCESS, 'Вы успешно оформили заказ')
+            return HttpResponseRedirect('/')
+
+
+class Search(View):
+    def find_products(self, arg):
+        result = []
+        content_models = ContentType.objects.filter(model__in=['mod', 'mechmod'])
+        for model in content_models:
+            result.extend(model.model_class().objects.filter(title__istartswith=arg))
+        print(result)
+        return result
+
+    def get(self, request, *args, **kwargs):
+        search_arg = request.GET['searchbox']
+        products = self.find_products(search_arg)
+        return render(request, 'search.html', {'products': products})

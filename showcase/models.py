@@ -112,6 +112,8 @@ class CartProduct(models.Model):
         self.final_price = self.qty * self.content_object.price
         super().save(*args,**kwargs)
 
+
+
     class Meta:
         verbose_name = 'Продукт корзины'
         verbose_name_plural = 'Продукты корзины'
@@ -122,9 +124,10 @@ class Cart(models.Model):
     products = models.ManyToManyField(CartProduct, verbose_name='Продукты', blank=True, related_name='related_cart')
     total_products = models.PositiveIntegerField(default=0, verbose_name='Кол-во продуктов')
     final_price = models.DecimalField(max_digits=9, decimal_places=2, default=0, verbose_name='Общая цена корзины')
+    in_order = models.BooleanField(default=False, verbose_name='В заказе')
 
     def __str__(self):
-        return str(self.id) + "корзина"
+        return str(self.id) + " корзина"
 
     class Meta:
         verbose_name = 'Корзина'
@@ -132,4 +135,26 @@ class Cart(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        # self.final_price = sum([fp.final_price for fp in self.products.all()])
+
+
+class Order(models.Model):
+    buyer_name = models.CharField(max_length=255,verbose_name='ФИО покупателя')
+    buyer_phone_number = models.CharField(max_length=25,verbose_name='Номер телефона')
+    buyer_address = models.CharField(max_length=400,verbose_name='Адрес')
+    cart = models.ForeignKey(Cart,on_delete=models.CASCADE, verbose_name='Корзина',null=True)
+    cost = models.DecimalField(max_digits=9,decimal_places=2,default=0,verbose_name='Стоимость')
+    order_time = models.DateTimeField(auto_now=True, verbose_name='Время заказа')
+
+    def __str__(self):
+        return "Заказ: "+ str(self.id)+str(self.order_time)
+
+    def save(self,*args,**kwargs):
+        self.cost = self.cart.final_price
+        self.cart.in_order = True
+        self.cart.save()
+        super().save(*args,**kwargs)
+
+    class Meta:
+        verbose_name = 'Заказ'
+        verbose_name_plural = 'Заказы'
+

@@ -4,12 +4,35 @@
 {% endblock %}
 
 {% block content %}
+
+        {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <strong>{{ message }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    <div class="container mt-3 mb-3">
+    {% if cart.products.all %}
     {% for pr in cart.products.all %}
         <a href="{{ pr.content_object.get_absolute_url }}">{{ pr.content_object }}</a><br>
         <img src="{{ pr.content_object.image.url }}" height="100"><br>
-        Количество:{{ pr.qty }} Цена:{{ pr.final_price }}<br>
-        <a href="{% url 'delete_from_cart' ct_model=pr.content_object.get_model_name product_slug=pr.content_object.slug %}">Удалить из корзины</a>
+        Количество:
+        <form action="{% url 'change_qty' ct_model=pr.content_object.get_model_name product_slug=pr.content_object.slug %}" method="POST">
+        {% csrf_token %}
+        <input type="number" class="form-control" name="qty" style="width: 50px;" min="1" value="{{ pr.qty }}">
+            <input type="submit" class="btn btn-primary" value="Изменить количество">
+        </form>
+        <br>
+        Цена:{{ pr.final_price }}<br>
+        <a href="{% url 'delete_from_cart' ct_model=pr.content_object.get_model_name product_slug=pr.content_object.slug %}" class="btn btn-danger">Удалить из корзины</a>
     <hr>
     {% endfor %}
-
+    <h4>Общая стоимость: {{ cart.final_price }} руб</h4><br>
+    <a href="{% url 'order' %}" class="btn btn-success">Сделать заказ</a>
+    {% else %}
+        <h1 align="center">Вы ничего не добавили в корзину</h1>
+    {% endif %}
+    </div>
 {% endblock %}

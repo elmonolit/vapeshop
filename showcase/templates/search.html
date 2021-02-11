@@ -1,0 +1,10 @@
+{% if products %}
+    <ul>
+    {% for product in products %}
+        <li><a href="{{ product.get_absolute_url }}">{{ product }}</li>
+    {% endfor %}
+    </ul>
+
+{% else %}
+    Ничего не найдено
+{% endif %}
